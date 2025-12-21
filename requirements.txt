@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+gunicorn
+jinja2
+python-dotenv
+sqlalchemy
+psycopg2-binary
+numpy
+scipy
+python-multipart
+matplotlib

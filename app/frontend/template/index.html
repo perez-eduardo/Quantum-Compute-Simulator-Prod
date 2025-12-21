@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{# 
+   App name: Quantum Computing Simulation
+   Template: index.html
+   Description: Homepage with project overview, technical stack, and navigation links.
+#}
+
+{% block title %}Home - Quantum Simulator{% endblock %}
+
+{% block content %}
+<!-- About This Project -->
+<section>
+    <h3>About This Project</h3>
+    <p>
+        A full-stack web application that simulates quantum computing operations,
+        demonstrating qubit state transformations through quantum gates and probabilistic measurement outcomes.
+        The simulator models fundamental quantum mechanics concepts including superposition,
+        measurement collapse, and probability distributions.
+    </p>
+</section>
+
+<!-- Technical Stack -->
+<section class="mt-lg">
+    <h3>Technical Stack</h3>
+    <p><strong>Backend:</strong> Python, FastAPI, SQLAlchemy, MySQL with Stored Procedures</p>
+    <p><strong>Frontend:</strong> Jinja2 Templates, Vanilla JavaScript, CSS3</p>
+    <p><strong>Data Visualization:</strong> Matplotlib for measurement histograms</p>
+    <p><strong>Deployment:</strong> Render (Web Service), Aiven (Cloud MySQL with SSL)</p>
+    <p><strong>Architecture:</strong> MVC pattern with usecase layer for business logic separation</p>
+</section>
+
+<!-- Quantum Computing Concepts -->
+<section class="mt-lg">
+    <h3>Quantum Computing Concepts</h3>
+    <ul>
+        <li><strong>Qubit States:</strong> Complex amplitude representation (α|0⟩ + β|1⟩) with normalization validation</li>
+        <li><strong>Quantum Gates:</strong> Unitary transformations (Pauli-X/Y/Z, Hadamard, Identity) via matrix operations</li>
+        <li><strong>Measurement:</strong> Probabilistic collapse to basis states based on |α|² and |β|²</li>
+        <li><strong>Superposition:</strong> Visualization of measurement outcome distributions</li>
+    </ul>
+</section>
+
+<!-- Page Navigation Links -->
+<section class="mt-lg">
+    <h3>Application Pages</h3>
+    <nav aria-label="Entity pages">
+        <ul class="nav-list">
+            <li class="mb-md">
+                <a href="/states"><strong>States</strong></a> — 
+                Manage quantum states represented by complex amplitudes
+            </li>
+            <li class="mb-md">
+                <a href="/gates"><strong>Gates</strong></a> — 
+                View quantum gate operations that transform states
+            </li>
+            <li class="mb-md">
+                <a href="/simulations"><strong>Simulations</strong></a> — 
+                Create and manage simulation runs applying gates to states
+            </li>
+            <li class="mb-md">
+                <a href="/shots"><strong>Shots</strong></a> — 
+                View measurement results with statistical visualizations
+            </li>
+        </ul>
+    </nav>
+</section>
+
+<!-- Learn More -->
+<section class="mt-lg">
+    <h3>Learn More About Quantum Computing</h3>
+    <p>New to quantum computing? This video provides an excellent introduction:</p>
+    <div class="video-container">
+        <iframe 
+            width="560" 
+            height="315" 
+            src="https://www.youtube.com/embed/RQWpF2Gb-gU?si=m-0E1Fm5XEZbXeX8" 
+            title="YouTube video player" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            referrerpolicy="strict-origin-when-cross-origin" 
+            allowfullscreen>
+        </iframe>
+    </div>
+</section>
+{% endblock %}

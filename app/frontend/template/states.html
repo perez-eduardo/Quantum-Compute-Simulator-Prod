@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{# 
+   App name: Quantum Computing Simulation
+   Template: states.html
+   Description: Quantum States management page with CRUD operations.
+                Displays states with complex amplitude values (α and β).
+                Modal dialogs for add/edit with normalization validation.
+#}
+
+{% block title %}States - Quantum Simulator{% endblock %}
+
+{% block content %}
+<!-- Page Title and Add Button -->
+<section>
+    <h2>Quantum States</h2>
+    <p><h4>Manage quantum states represented by complex amplitudes α and β.</h4></p>
+    
+    <button id="showStatesFormBtn" type="button" aria-label="Add new quantum state">Add New State</button>  
+</section>
+
+<!-- States Table -->
+<section class="mt-lg">
+    <div class="table-container">
+        <div class="table-scroll-wrapper">
+            <table class="states-table" border="1">
+                <caption><h3>Existing States</h3></caption>
+                <thead>
+                    <tr>
+                        <th scope="col" class="col-name">Name</th>
+                        <th scope="col" class="col-symbol">Symbol</th>
+                        <th scope="col" class="col-amplitude">α (Real)</th>
+                        <th scope="col" class="col-amplitude">α (Imag)</th>
+                        <th scope="col" class="col-amplitude">β (Real)</th>
+                        <th scope="col" class="col-amplitude">β (Imag)</th>
+                        <th scope="col" class="col-description">Description</th>
+                        <th scope="col" class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for state in data %}
+                    <tr data-state-id="{{ state.stateID }}">
+                        <td>{{ state.name }}</td>
+                        <td>{{ state.symbol }}</td>
+                        <td>{{ state.alphaReal }}</td>
+                        <td>{{ state.alphaImgn }}</td>
+                        <td>{{ state.betaReal }}</td>
+                        <td>{{ state.betaImgn }}</td>
+                        <td>{{ state.description }}</td>
+                        <td class="actions-cell">
+                            {% if state.stateID > 6 %}
+                            <button type="button" id="Edit-{{ state.stateID }}">Edit</button>
+                            <button type="button" id="Delete-{{ state.stateID }}">Delete</button>
+                            {% else %}
+                            &nbsp;
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Add State Dialog -->
+<dialog id="addStateDialog">
+    <div class="modal-header">
+        <h3>Add new initial state</h3>
+        <button type="button" class="close-modal" aria-label="Close">&times;</button>
+    </div>
+    <form id="addStateForm">
+        <div id="addFormErrorMsg" class="form-error-msg"></div>
+        <fieldset class="dialog-fieldset">
+            <legend>State Information</legend>
+            
+            <div>
+                <label class="dialog-label" for="addStateName">Name:</label>
+                <input class="dialog-input" type="text" id="addStateName" name="stateName" maxlength="45" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="addStateSymbol">Symbol:</label>
+                <input class="dialog-input" type="text" id="addStateSymbol" name="stateSymbol" maxlength="1" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="addAlphaReal">α Real:</label>
+                <input class="dialog-input" type="number" id="addAlphaReal" name="alphaReal" step="0.00000001" min="-1" max="1" value="0.5" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="addAlphaImgn">α Imaginary:</label>
+                <input class="dialog-input" type="number" id="addAlphaImgn" name="alphaImgn" step="0.00000001" min="-1" max="1" value="0.5" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="addBetaReal">β Real:</label>
+                <input class="dialog-input" type="number" id="addBetaReal" name="betaReal" step="0.00000001" min="-1" max="1" value="0.5" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="addBetaImgn">β Imaginary:</label>
+                <input class="dialog-input" type="number" id="addBetaImgn" name="betaImgn" step="0.00000001" min="-1" max="1" value="0.5" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="addDescription">Description:</label>
+                <input class="dialog-input" type="text" id="addDescription" name="description" maxlength="100" placeholder="Brief description of this state" required>
+            </div>
+            
+            <div class="dialog-buttons">
+                <button type="submit">Save State</button>
+                <button type="reset" class="clearBtn">Clear Form</button>
+            </div>
+        </fieldset>
+        
+        <div class="form-info">
+            <p><strong>Valid Input:</strong></p>
+            <ul>
+                <li><strong>Name:</strong> 1-45 characters</li>
+                <li><strong>Symbol:</strong> Single character only (will be saved as |symbol>)</li>
+                <li><strong>Coefficients:</strong> Values between -1 and 1</li>
+                <li><strong>Normalization:</strong> |α|² + |β|² must equal 1</li>
+                <li><strong>Description:</strong> 1-100 characters</li>
+            </ul>
+        </div>
+    </form>
+</dialog>
+
+<!-- Edit State Dialog -->
+<dialog id="editStateDialog">
+    <div class="modal-header">
+        <h3>Edit initial state</h3>
+        <button type="button" class="close-modal" aria-label="Close">&times;</button>
+    </div>
+    <form id="editStateForm">
+        <div id="editFormErrorMsg" class="form-error-msg"></div>
+        <fieldset class="dialog-fieldset">
+            <legend>State Information</legend>
+
+            <input type="hidden" id="editStateID" name="stateID">
+            
+            <div>
+                <label class="dialog-label" for="editStateName">Name:</label>
+                <input class="dialog-input" type="text" id="editStateName" name="stateName" maxlength="45" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="editStateSymbol">Symbol:</label>
+                <input class="dialog-input" type="text" id="editStateSymbol" name="stateSymbol" maxlength="1" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="editAlphaReal">α Real:</label>
+                <input class="dialog-input" type="number" id="editAlphaReal" name="alphaReal" step="0.00000001" min="-1" max="1" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="editAlphaImgn">α Imaginary:</label>
+                <input class="dialog-input" type="number" id="editAlphaImgn" name="alphaImgn" step="0.00000001" min="-1" max="1" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="editBetaReal">β Real:</label>
+                <input class="dialog-input" type="number" id="editBetaReal" name="betaReal" step="0.00000001" min="-1" max="1" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="editBetaImgn">β Imaginary:</label>
+                <input class="dialog-input" type="number" id="editBetaImgn" name="betaImgn" step="0.00000001" min="-1" max="1" required>
+            </div>
+            
+            <div>
+                <label class="dialog-label" for="editDescription">Description:</label>
+                <input class="dialog-input" type="text" id="editDescription" name="description" maxlength="100" required>
+            </div>
+            
+            <div class="dialog-buttons">
+                <button type="submit">Save State</button>
+                <button type="reset" class="clearBtn">Clear Form</button>
+            </div>
+        </fieldset>
+        
+        <div class="form-info">
+            <p><strong>Valid Input:</strong></p>
+            <ul>
+                <li><strong>Name:</strong> 1-45 characters</li>
+                <li><strong>Symbol:</strong> Single character only (will be saved as |symbol>)</li>
+                <li><strong>Coefficients:</strong> Values between -1 and 1</li>
+                <li><strong>Normalization:</strong> |α|² + |β|² must equal 1</li>
+                <li><strong>Description:</strong> 1-100 characters</li>
+            </ul>
+        </div>
+    </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/states_page.js') }}"></script>
+{% endblock %}

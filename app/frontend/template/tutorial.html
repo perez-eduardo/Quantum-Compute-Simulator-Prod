@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{# 
+   App name: Quantum Computing Simulation
+   Template: tutorial.html
+   Description: Tutorial page explaining how to use the app.
+                Responsive design ensures text is readable without horizontal scrolling.
+#}
+
+{% block title %}Tutorial - Quantum Simulator{% endblock %}
+
+{% block content %}
+<div class="tutorial-content">
+    <!-- About This Page -->
+    <section>
+        <h3>About this page</h3>
+        <p>
+            This page guides users through the Quantum Computing Simulator, including those new to quantum computing.
+        </p>
+        <p>
+            The simulator comes pre-configured with standard quantum states and gates, so you can start running simulations immediately.
+        </p>
+    </section>
+
+    <!-- Quick Start -->
+    <section>
+        <h3>Quick Start</h3>
+        <ol>
+            <li>Go to <a href="/simulations"><strong>Simulations</strong></a></li>
+            <li>Click "Run New Simulation"</li>
+            <li>Select an initial state, a gate, and number of shots</li>
+            <li>View your results!</li>
+        </ol>
+    </section>
+
+    <!-- Understanding the Concepts -->
+    <section>
+        <h3>Understanding the Concepts</h3>
+        
+        <h4><a href="/states">States</a></h4>
+        <p>
+            Quantum states represent the initial configuration of a qubit. Each state is defined by complex amplitudes α and β,
+            where |ψ⟩ = α|0⟩ + β|1⟩. The simulator includes 6 standard quantum states:
+        </p>
+        <ul>
+            <li><strong>|0⟩</strong> - Zero state (ground state)</li>
+            <li><strong>|1⟩</strong> - One state (excited state)</li>
+            <li><strong>|+⟩</strong> - Plus state (equal superposition)</li>
+            <li><strong>|-⟩</strong> - Minus state (superposition with phase flip)</li>
+            <li><strong>|i⟩</strong> - i state (superposition with +i phase)</li>
+            <li><strong>|-i⟩</strong> - Minus-i state (superposition with -i phase)</li>
+        </ul>
+        <p>
+            You can also create custom states if needed. Custom states must satisfy the normalization condition: |α|² + |β|² = 1.
+        </p>
+
+        <h4><a href="/gates">Gates</a></h4>
+        <p>
+            Quantum gates are operations that transform quantum states. The simulator includes 5 standard gates:
+        </p>
+        <ul>
+            <li><strong>|X|</strong> - Pauli-X (bit flip)</li>
+            <li><strong>|Y|</strong> - Pauli-Y (bit and phase flip)</li>
+            <li><strong>|Z|</strong> - Pauli-Z (phase flip)</li>
+            <li><strong>|H|</strong> - Hadamard (creates superposition)</li>
+            <li><strong>|I|</strong> - Identity (no change)</li>
+        </ul>
+
+        <h4><a href="/simulations">Simulations</a></h4>
+        <p>
+            This is where you run quantum experiments. A simulation applies a gate to an initial state
+            and performs multiple "shots" (measurements). Each shot collapses the quantum state to either |0⟩ or |1⟩
+            based on the probability amplitudes.
+        </p>
+        <p>
+            <strong>To run a simulation:</strong>
+        </p>
+        <ol>
+            <li>Click "Run New Simulation"</li>
+            <li>Select an initial state (e.g., |0⟩)</li>
+            <li>Select a gate (e.g., |H| for Hadamard)</li>
+            <li>Choose number of shots (5-100)</li>
+            <li>Click "Run Simulation"</li>
+        </ol>
+        <p>
+            A progress window will appear showing the simulation status. When complete, click "View Results" to see the outcome distribution.
+        </p>
+
+        <h4><a href="/shots">Results</a></h4>
+        <p>
+            View measurement results from your simulations. Select a simulation from the dropdown to see:
+        </p>
+        <ul>
+            <li>A histogram showing the distribution of |0⟩ vs |1⟩ outcomes</li>
+            <li>An interpretation explaining what the results mean</li>
+            <li>Detailed shot data with individual measurement values</li>
+        </ul>
+    </section>
+
+    <!-- Example: Creating Superposition -->
+    <section>
+        <h3>Example: Creating Superposition</h3>
+        <p>
+            Try this classic quantum experiment:
+        </p>
+        <ol>
+            <li>Go to <a href="/simulations"><strong>Simulations</strong></a></li>
+            <li>Select <strong>Zero state (|0⟩)</strong> as the initial state</li>
+            <li>Select <strong>H Gate (|H|)</strong> as the gate</li>
+            <li>Set shots to <strong>100</strong></li>
+            <li>Run the simulation</li>
+        </ol>
+        <p>
+            The Hadamard gate transforms |0⟩ into an equal superposition of |0⟩ and |1⟩.
+            You should see approximately 50% of shots measuring |0⟩ and 50% measuring |1⟩.
+        </p>
+    </section>
+
+    <!-- Tips -->
+    <section>
+        <h3>Tips</h3>
+        <ul>
+            <li>Use the <strong>Reset Database</strong> button in the sidebar to restore default data</li>
+            <li>Standard states (|0⟩, |1⟩, |+⟩, |-⟩, |i⟩, |-i⟩) cannot be edited or deleted</li>
+            <li>Deleting a state will also delete any simulations that used it</li>
+            <li>Only one simulation can run at a time per browser session</li>
+        </ul>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+# Environment
+app/.env
+qc_core/.env
+
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+usecase/__pycache__/__init__.cpython-311.pyc
+usecase/__pycache__/base_usecase.cpython-311.pyc
+usecase/__pycache__/gates_usecase.cpython-311.pyc
+usecase/__pycache__/index_usecase.cpython-311.pyc
+usecase/__pycache__/shots_usecases.cpython-311.pyc
+usecase/__pycache__/simulations_usecase.cpython-311.pyc
+usecase/__pycache__/states_usecase.cpython-311.pyc
+utils/__pycache__/constants.cpython-311.pyc
+utils/__pycache__/decorators.cpython-311.pyc
+app/app/__pycache__/main.cpython-311.pyc

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{# 
+   App name: Quantum Computing Simulation
+   Template: shots.html
+   Description: Simulation Results page.
+                Displays shot results with filtering, visualization graph, and pagination.
+#}
+
+{% block title %}Results - Quantum Simulator{% endblock %}
+
+{% block content %}
+<!-- Page Title -->
+<section>
+    <h2>Simulation Results</h2>
+    <p><h4>View measurement results from simulation runs.</h4></p>
+</section>
+
+<!-- Filter by Simulation ID -->
+<section>
+    <h3>Select Simulation</h3>
+    <form id="shotFilter" class="shot-filter">
+        <label for="filterSimID">Simulation:</label>
+        <select id="filterSimID" name="filterSimID">
+            <option value="">-- Choose a Simulation --</option>
+            {% for sim in data.sim_data %}
+            <option value="{{ sim.simID }}" {% if data.current_sim_id == sim.simID %}selected{% endif %}>{{ sim.choice }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</section>
+
+<!-- Measurement Results Graph -->
+<section>
+    <div class="graph-container">
+        <img src="data:image/png;base64,{{ data.graph_image }}" 
+             alt="Measurement Results Histogram">
+    </div>
+    {% if data.graph_interpretation %}
+    <div class="graph-interpretation">
+        <p>
+            <strong>Interpretation:</strong> {{ data.graph_interpretation }}
+        </p>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Shots Table (only shown when simulation is selected) -->
+{% if data.sim_selected %}
+<section>
+    <div class="table-container">
+        <div class="table-scroll-wrapper">
+            <table class="shots-table" border="1" id="shotsTable">
+                <caption><h3>Shot Details</h3></caption>
+                <thead>
+                    <tr>
+                        <th scope="col" class="col-id">Shot ID</th>
+                        <th scope="col" class="col-id">Simulation ID</th>
+                        <th scope="col" class="col-amplitude">α (Real)</th>
+                        <th scope="col" class="col-amplitude">α (Imaginary)</th>
+                        <th scope="col" class="col-amplitude">β (Real)</th>
+                        <th scope="col" class="col-amplitude">β (Imaginary)</th>
+                        <th scope="col" class="col-symbol">Output State</th>
+                    </tr>
+                </thead>
+                <tbody id="shotsTableBody">
+                    {% for shot in data.shot_data %}
+                    <tr>
+                        <td>{{ shot.shotID }}</td>
+                        <td>{{ shot.simID }}</td>
+                        <td>{{ shot.alphaReal }}</td>
+                        <td>{{ shot.alphaImgn }}</td>
+                        <td>{{ shot.betaReal }}</td>
+                        <td>{{ shot.betaImgn }}</td>
+                        <td>{{ shot.outputState }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <nav id="shotsPagination" class="pagination" aria-label="Shots pagination">
+    </nav>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/shots_page.js') }}"></script>
+{% endblock %}

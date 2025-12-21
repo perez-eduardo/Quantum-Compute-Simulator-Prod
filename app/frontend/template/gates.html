@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{# 
+   App name: Quantum Computing Simulation
+   Template: gates.html
+   Description: Quantum Gates display page (read-only).
+                Shows standard quantum gate operations.
+#}
+
+{% block title %}Gates - Quantum Simulator{% endblock %}
+
+{% block content %}
+<!-- Page Title -->
+<section>
+    <h2>Quantum Gates</h2>
+    <p><h4>Standard quantum gate operations applied to quantum states.</h4></p>
+</section>
+
+<!-- Gates Table -->
+<section class="mt-lg">
+    <div class="table-container">
+        <div class="table-scroll-wrapper">
+            <table class="gates-table" border="1">
+                <caption><h3>Available Gates</h3></caption>
+                <thead>
+                    <tr>
+                        <th scope="col" class="col-name">Name</th>
+                        <th scope="col" class="col-symbol">Symbol</th>
+                        <th scope="col" class="col-description">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for gate in data %}
+                    <tr>
+                        <td>{{ gate.name }}</td>
+                        <td>{{ gate.symbol }}</td>
+                        <td>{{ gate.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/gates_page.js') }}"></script>
+{% endblock %}

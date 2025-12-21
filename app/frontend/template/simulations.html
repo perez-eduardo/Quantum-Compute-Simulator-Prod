@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{# 
+   App name: Quantum Computing Simulation
+   Template: simulations.html
+   Description: Simulations management page.
+                Create new simulations by selecting state, gate, and shots.
+                Progress shown in floating window (defined in base.html).
+#}
+
+{% block title %}Simulations - Quantum Simulator{% endblock %}
+
+{% block content %}
+<!-- Page Title and Add Button -->
+<section>
+    <h2>Quantum Simulations</h2>
+    <p><h4>Manage simulation runs that apply gates to quantum states.</h4></p>
+    
+    <button id="showSimFormBtn" type="button" aria-label="Add new simulation">Run New Simulation</button>
+</section>
+
+<!-- Simulations Table -->
+<section class="mt-lg">
+    <div class="table-container">
+        <div class="table-scroll-wrapper">
+            <table border="1">
+                <caption><h3>Existing Simulations</h3></caption>
+                <thead>
+                    <tr>
+                        <th scope="col" class="col-id">Simulation ID</th>
+                        <th scope="col" class="col-symbol">Initial State</th>
+                        <th scope="col" class="col-symbol">Gate</th>
+                        <th scope="col" class="col-id">Number of Shots</th>
+                        <th scope="col" class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sim in data.sim_data %}
+                    <tr>
+                        <td>{{ sim.simID }}</td>
+                        <td>{{ sim.initialState }}</td>
+                        <td>{{ sim.gateSymbol }}</td>
+                        <td>{{ sim.numOfShots }}</td>
+                        <td class="actions-cell">
+                            <button type="button" id="View-{{ sim.simID }}" aria-label="View shots for {{ sim.simID }}">View</button>
+                            <button type="button" id="Delete-{{ sim.simID }}" aria-label="Delete {{ sim.simID }}">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Add Simulation Dialog -->
+<dialog id="addSimDialog">
+    <div class="modal-header">
+        <div>
+            <h3>Run New Simulation</h3>
+        </div>
+        <button type="button" class="close-modal" aria-label="Close">&times;</button>
+    </div>
+    <form id="addSimForm">
+        <div id="addFormErrorMsg" class="form-error-msg"></div>
+        <fieldset class="dialog-fieldset">
+            <legend>Simulation Configuration</legend>
+            
+            <div>
+                <label class="dialog-label dialog-label-lg" for="stateID">Select Initial State:</label>
+                <select class="dialog-input" id="stateID" name="stateID" required>
+                    <option value="">-- Select State --</option>
+                    {% for state in data.state_data %}
+                    <option value="{{ state.stateID }}">{{ state.name_symbol }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="dialog-label dialog-label-lg" for="gateID">Select Gate:</label>
+                <select class="dialog-input" id="gateID" name="gateID" required>
+                    <option value="">-- Select Gate --</option>
+                    {% for gate in data.gate_data %}
+                    <option value="{{ gate.gateID }}">{{ gate.name_symbol }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="dialog-label dialog-label-lg" for="numShots">Number of Shots:</label>
+                <input class="dialog-input" type="number" id="numShots" name="numShots" min="5" max="100" value="100" required>
+            </div>
+            
+            <div class="dialog-buttons">
+                <button type="submit">Run Simulation</button>
+                <button type="reset" class="clearBtn">Clear Form</button>
+            </div>
+        </fieldset>
+        
+        <div class="form-info">
+            <p><strong>Valid Input Requirements:</strong></p>
+            <ul>
+                <li><strong>Initial State:</strong> Required - select from available quantum states</li>
+                <li><strong>Gate:</strong> Required - select a quantum gate to apply</li>
+                <li><strong>Number of Shots:</strong> Required - must be between 5 and 100</li>
+            </ul>
+        </div>
+    </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/simulations_page.js') }}"></script>
+{% endblock %}

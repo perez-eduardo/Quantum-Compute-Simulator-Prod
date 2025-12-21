@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: quantum-simulator
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASS
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_SSL_CA
+        sync: false

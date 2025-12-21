@@ -1,0 +1,163 @@
+{# 
+   App name: Quantum Computing Simulation
+   Template: base.html
+   Description: Base template with collapsible sidebar layout and progress tracking.
+#}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Quantum Simulator{% endblock %}</title>
+
+    <!-- Main app styles -->
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='images/favicon.ico') }}">
+
+    <!-- Icons (Font Awesome CDN) -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="sidebar-collapsed no-transitions">
+    <div class="layout">
+        <!-- ===============================
+             SECTION: Sidebar
+             =============================== -->
+        <aside class="sidebar" aria-label="Main navigation">
+            <!-- Sidebar Header with Toggle -->
+            <div class="sidebar-header">
+                <a href="/" class="sidebar-logo-link">
+                    <img src="{{ url_for('static', path='images/logo.png') }}" alt="Quantum Simulator" class="sidebar-logo-img">
+                </a>
+                <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+
+            <!-- Sidebar Navigation Links -->
+            <nav>
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="/" data-tooltip="Home" class="{% if request.url.path == '/' %}active{% endif %}">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/states" data-tooltip="States" class="{% if '/states' in request.url.path %}active{% endif %}">
+                            <i class="fas fa-wave-square"></i>
+                            <span>States</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/gates" data-tooltip="Gates" class="{% if '/gates' in request.url.path %}active{% endif %}">
+                            <i class="fa-brands fa-react"></i>
+                            <span>Gates</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/simulations" data-tooltip="Simulations" class="{% if '/simulations' in request.url.path %}active{% endif %}">
+                            <i class="fas fa-play-circle"></i>
+                            <span>Simulations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/shots" data-tooltip="Results" class="{% if '/shots' in request.url.path %}active{% endif %}">
+                            <i class="fas fa-chart-column"></i>
+                            <span>Results</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tutorial" data-tooltip="Tutorial" class="{% if '/tutorial' in request.url.path %}active{% endif %}">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>Tutorial</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Sidebar Action Buttons -->
+            <div class="sidebar-actions">
+                <button type="button" id="resetBtn" class="sidebar-action-btn btn-reset" data-tooltip="Reset Data">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Reset Data</span>
+                </button>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <p>&copy; 2025 Eduardo Perez</p>
+            </div>
+        </aside>
+
+        <!-- ===============================
+             SECTION: Main Content Area
+             =============================== -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <header class="main-header">
+                <h1>Quantum Computing Simulator</h1>
+            </header>
+
+            <!-- Page Content (child templates inject here) -->
+            <main>
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- Child template scripts -->
+            {% block scripts %}{% endblock %}
+
+            <!-- Base JavaScript (loaded on all pages) -->
+            <script src="{{ url_for('static', path='js/base.js') }}"></script>
+        </div>
+    </div>
+
+    <!-- ===============================
+         SECTION: Docked Progress Bar
+         Single line at bottom of main content area
+         =============================== -->
+    <div id="dockedProgress" class="docked-progress hidden">
+        <div class="docked-progress-inner">
+            <i class="fas fa-spinner fa-spin docked-spinner"></i>
+            <span id="dockedStatus" class="docked-status">Generating shots...</span>
+            <div class="docked-bar">
+                <div class="docked-bar-fill" id="dockedBarFill"></div>
+            </div>
+            <span id="dockedCount" class="docked-count">0/100</span>
+            <span id="dockedPercent" class="docked-percent">(0%)</span>
+        </div>
+    </div>
+
+    <!-- ===============================
+         SECTION: Simulation Complete/Error Modal
+         =============================== -->
+    <dialog id="simulationResultModal" class="simulation-result-modal">
+        <div class="modal-header">
+            <h3 id="simResultTitle">
+                <i id="simResultIcon" class="fas fa-check-circle"></i>
+                <span id="simResultTitleText">Simulation Complete!</span>
+            </h3>
+            <button type="button" class="close-modal" id="simResultCloseX" aria-label="Close">&times;</button>
+        </div>
+        <div class="simulation-result-content">
+            <p id="simResultMessage">Your simulation has finished successfully.</p>
+            <p id="simResultDetails" class="result-details"></p>
+        </div>
+        <div class="simulation-result-actions">
+            <button type="button" id="simResultViewBtn" class="btn-primary">
+                <i class="fas fa-chart-bar"></i> View Results
+            </button>
+            <button type="button" id="simResultRetryBtn" class="btn-warning hidden">
+                <i class="fas fa-redo"></i> Retry
+            </button>
+            <button type="button" id="simResultCloseBtn" class="btn-secondary">
+                Close
+            </button>
+        </div>
+    </dialog>
+</body>
+</html>
