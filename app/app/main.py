@@ -6,18 +6,23 @@ Description: FastAPI application entry point. Defines all API routes for CRUD op
 
 import os
 from pathlib import Path
-from fastapi import FastAPI, Request, Form, Response, BackgroundTasks
+from datetime import date
+from fastapi import FastAPI, Request, Form, Response, BackgroundTasks, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from usecase.index_usecase import IndexUsecase
 from usecase.gates_usecase import GatesUsecase
 from usecase.states_usecase import StatesUsecase
 from usecase.shots_usecases import ShotsUsecase
 from usecase.simulations_usecase import SimulationsUsecase
 from utils.constants import Constants
+import tempfile
 
 code = Constants.ResponseCode
 
@@ -40,11 +45,41 @@ engine = create_engine(
     connect_args={"connect_timeout": 10},
 )
 
+# ----- Rate Limiting -----
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Static & templates
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(FRONTEND_DIR / "template"))
+
+
+# ============================================
+#  Daily Budget Guards
+# ============================================
+DAILY_QUERY_LIMIT = 500  # Max simulations per day
+DAILY_RESET_LIMIT = 10   # Max resets per day
+
+
+def get_daily_count(name: str) -> int:
+    """Get daily counter value from temp file."""
+    filename = os.path.join(tempfile.gettempdir(), f"{name}_{date.today()}.count")
+    try:
+        with open(filename) as f:
+            return int(f.read())
+    except FileNotFoundError:
+        return 0
+
+
+def increment_count(name: str):
+    """Increment daily counter."""
+    filename = os.path.join(tempfile.gettempdir(), f"{name}_{date.today()}.count")
+    count = get_daily_count(name) + 1
+    with open(filename, "w") as f:
+        f.write(str(count))
 
 
 # ============================================
@@ -73,7 +108,8 @@ def health():
 
 
 @app.get("/db-ping")
-def db_ping():
+@limiter.limit("30/minute")
+def db_ping(request: Request):
     """Database connectivity check."""
     try:
         with engine.connect() as conn:
@@ -87,6 +123,7 @@ def db_ping():
 #  Top page
 # ============================================
 @app.get("/", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 def index(request: Request):
     """Render the homepage."""
     return templates.TemplateResponse(
@@ -96,9 +133,18 @@ def index(request: Request):
 
 
 @app.post("/reset")
-def reset_db():
+@limiter.limit("5/minute")
+def reset_db(request: Request):
     """Reset database to initial state with sample data."""
+    # Daily budget guard
+    if get_daily_count("resets") >= DAILY_RESET_LIMIT:
+        raise HTTPException(503, "Daily reset limit reached. Try tomorrow.")
+    
     response = IndexUsecase(engine).reset()
+    
+    if response["status_code"] == code.CODE_200:
+        increment_count("resets")
+    
     return _build_response(response)
 
 
@@ -106,6 +152,7 @@ def reset_db():
 #  States
 # ============================================
 @app.get("/states", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 def get_states(request: Request):
     """Retrieve and display all quantum states."""
     response = StatesUsecase(engine).show()
@@ -117,7 +164,9 @@ def get_states(request: Request):
 
 
 @app.post("/states")
+@limiter.limit("20/minute")
 def post_states(
+    request: Request,
     stateName: str = Form(...),
     stateSymbol: str = Form(...),
     alphaReal: float = Form(...),
@@ -141,7 +190,9 @@ def post_states(
 
 
 @app.put("/states/{state_id}")
+@limiter.limit("20/minute")
 def put_states(
+    request: Request,
     state_id: int,
     stateName: str = Form(...),
     stateSymbol: str = Form(...),
@@ -167,7 +218,8 @@ def put_states(
 
 
 @app.delete("/states/{state_id}")
-def delete_states(state_id: int):
+@limiter.limit("20/minute")
+def delete_states(request: Request, state_id: int):
     """Delete a quantum state by ID."""
     response = StatesUsecase(engine).delete(state_id)
     return _build_response(response)
@@ -177,6 +229,7 @@ def delete_states(state_id: int):
 #  Gates (read-only)
 # ============================================
 @app.get("/gates", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 def get_gates(request: Request):
     """Retrieve and display all quantum gates."""
     response = GatesUsecase(engine).show()
@@ -191,6 +244,7 @@ def get_gates(request: Request):
 #  Simulations
 # ============================================
 @app.get("/simulations", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 def get_simulations(request: Request):
     """Retrieve and display all simulations."""
     response = SimulationsUsecase(engine).show()
@@ -202,12 +256,17 @@ def get_simulations(request: Request):
 
 
 @app.post("/simulations")
+@limiter.limit("10/minute")
 async def post_simulations(request: Request, background_tasks: BackgroundTasks):
     """
     Create a new simulation with shots.
     Returns 202 Accepted immediately, shots are generated in background.
     Client should poll /simulations/{simID}/progress for status.
     """
+    # Daily budget guard
+    if get_daily_count("simulations") >= DAILY_QUERY_LIMIT:
+        raise HTTPException(503, "Daily simulation limit reached. Try tomorrow.")
+    
     data = await request.json()
     usecase = SimulationsUsecase(engine)
     
@@ -222,12 +281,14 @@ async def post_simulations(request: Request, background_tasks: BackgroundTasks):
             sim_id,
             data
         )
+        increment_count("simulations")
     
     return _build_response(response)
 
 
 @app.get("/simulations/{sim_id}/progress")
-def get_simulation_progress(sim_id: int):
+@limiter.limit("120/minute")
+def get_simulation_progress(request: Request, sim_id: int):
     """
     Get progress of shot generation for a simulation.
     Returns current/total shots and status (processing/complete/error).
@@ -244,7 +305,8 @@ def get_simulation_progress(sim_id: int):
 
 
 @app.delete("/simulations/{sim_id}/progress")
-def clear_simulation_progress(sim_id: int):
+@limiter.limit("60/minute")
+def clear_simulation_progress(request: Request, sim_id: int):
     """
     Clear progress tracking for a simulation (cleanup after complete).
     """
@@ -253,7 +315,8 @@ def clear_simulation_progress(sim_id: int):
 
 
 @app.delete("/simulations/{sim_id}")
-def delete_simulation(sim_id: int):
+@limiter.limit("20/minute")
+def delete_simulation(request: Request, sim_id: int):
     """Delete a simulation and its associated shots."""
     response = SimulationsUsecase(engine).delete(sim_id)
     return _build_response(response)
@@ -263,6 +326,7 @@ def delete_simulation(sim_id: int):
 #  Shots
 # ============================================
 @app.get("/shots", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 def get_shots(request: Request):
     """Retrieve and display all measurement shots."""
     response = ShotsUsecase(engine).show()
@@ -274,6 +338,7 @@ def get_shots(request: Request):
 
 
 @app.get("/shots/{sim_id}", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 def filter_shots(request: Request, sim_id: int):
     """Filter and display shots by simulation ID."""
     response = ShotsUsecase(engine).filter(sim_id)
@@ -288,6 +353,7 @@ def filter_shots(request: Request, sim_id: int):
 #  Tutorial
 # ============================================
 @app.get("/tutorial", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 def get_tutorial(request: Request):
     """Return the tutorial page."""
     return templates.TemplateResponse(
