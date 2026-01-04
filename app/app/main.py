@@ -360,3 +360,16 @@ def get_tutorial(request: Request):
         "tutorial.html",
         {"request": request, "title": "Quantum Simulator"},
     )
+
+
+# ============================================
+#  Contact
+# ============================================
+@app.get("/contact", response_class=HTMLResponse)
+@limiter.limit("60/minute")
+def get_contact(request: Request):
+    """Return the contact page."""
+    return templates.TemplateResponse(
+        "contact.html",
+        {"request": request, "title": "Contact"},
+    )
