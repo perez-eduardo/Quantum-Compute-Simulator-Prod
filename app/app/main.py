@@ -127,8 +127,9 @@ def db_ping(request: Request):
 def index(request: Request):
     """Render the homepage."""
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "title": "Quantum Simulator"},
+        request=request,
+        name="index.html",
+        context={"title": "Quantum Simulator"},
     )
 
 
@@ -157,9 +158,10 @@ def get_states(request: Request):
     """Retrieve and display all quantum states."""
     response = StatesUsecase(engine).show()
     return templates.TemplateResponse(
-        "states.html",
+        request=request,
+        name="states.html",
         status_code=response["status_code"],
-        context={"request": request, **response.get("context", {})}
+        context=response.get("context", {})
     )
 
 
@@ -234,9 +236,10 @@ def get_gates(request: Request):
     """Retrieve and display all quantum gates."""
     response = GatesUsecase(engine).show()
     return templates.TemplateResponse(
-        "gates.html",
+        request=request,
+        name="gates.html",
         status_code=response["status_code"],
-        context={"request": request, **response.get("context", {})}
+        context=response.get("context", {})
     )
 
 
@@ -249,9 +252,10 @@ def get_simulations(request: Request):
     """Retrieve and display all simulations."""
     response = SimulationsUsecase(engine).show()
     return templates.TemplateResponse(
-        "simulations.html",
+        request=request,
+        name="simulations.html",
         status_code=response["status_code"],
-        context={"request": request, **response.get("context", {})}
+        context=response.get("context", {})
     )
 
 
@@ -331,9 +335,10 @@ def get_shots(request: Request):
     """Retrieve and display all measurement shots."""
     response = ShotsUsecase(engine).show()
     return templates.TemplateResponse(
-        "shots.html",
+        request=request,
+        name="shots.html",
         status_code=response["status_code"],
-        context={"request": request, **response.get("context", {})}
+        context=response.get("context", {})
     )
 
 
@@ -343,9 +348,10 @@ def filter_shots(request: Request, sim_id: int):
     """Filter and display shots by simulation ID."""
     response = ShotsUsecase(engine).filter(sim_id)
     return templates.TemplateResponse(
-        "shots.html",
+        request=request,
+        name="shots.html",
         status_code=response["status_code"],
-        context={"request": request, **response.get("context", {})}
+        context=response.get("context", {})
     )
 
 
@@ -357,8 +363,9 @@ def filter_shots(request: Request, sim_id: int):
 def get_tutorial(request: Request):
     """Return the tutorial page."""
     return templates.TemplateResponse(
-        "tutorial.html",
-        {"request": request, "title": "Quantum Simulator"},
+        request=request,
+        name="tutorial.html",
+        context={"title": "Quantum Simulator"},
     )
 
 
@@ -370,6 +377,7 @@ def get_tutorial(request: Request):
 def get_contact(request: Request):
     """Return the contact page."""
     return templates.TemplateResponse(
-        "contact.html",
-        {"request": request, "title": "Contact"},
+        request=request,
+        name="contact.html",
+        context={"title": "Contact"},
     )
