@@ -101,7 +101,7 @@ def _build_response(response: dict):
 # ============================================
 #  Health Checks
 # ============================================
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health():
     """Health check endpoint."""
     return {"ok": True}
